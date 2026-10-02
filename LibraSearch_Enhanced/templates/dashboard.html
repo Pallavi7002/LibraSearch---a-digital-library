@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — LibraSearch{% endblock %}
+{% block content %}
+<section class="page-head reveal">
+  <div><span class="eyebrow">Personal dashboard</span><h1>Welcome, {{ current_user.name.split(' ')[0] }}.</h1><p>Track your reading rhythm, daily records and search activity.</p></div>
+  <div class="streak-badge"><span>🔥</span><div><b>{{ streak }} day{% if streak != 1 %}s{% endif %}</b><small>current streak</small></div></div>
+</section>
+
+<div class="stats reveal">
+  <div><strong>{{ searches }}</strong><span>Searches</span></div>
+  <div><strong>{{ wishlist_n }}</strong><span>Wishlist</span></div>
+  <div><strong>{{ orders }}</strong><span>Orders</span></div>
+  <div><strong>{{ total_minutes }}</strong><span>Reading minutes</span></div>
+</div>
+
+<section class="dashboard-grid reveal">
+  <div class="glass reading-panel">
+    <div class="section-head compact"><div><span class="eyebrow">Reading rhythm</span><h2>Daily reading record</h2></div><span class="record-pill">{{ reading_sessions }} sessions</span></div>
+    <div class="reading-chart">
+      {% set max_minutes = daily|map(attribute='minutes')|max %}
+      {% if max_minutes == 0 %}{% set max_minutes = 1 %}{% endif %}
+      {% for d in daily %}
+      <div class="day-column" title="{{ d.minutes }} minutes on {{ d.date }}">
+        <div class="bar-track"><div class="reading-bar" style="height: {{ [((d.minutes / max_minutes) * 100), 8]|max }}%"><span>{{ d.minutes }}m</span></div></div>
+        <b>{{ d.label }}</b><small>{{ d.sessions }} session{% if d.sessions != 1 %}s{% endif %}</small>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="reading-footer"><span>Keep showing up — consistency builds your streak.</span><strong>🔥 {{ streak }} days</strong></div>
+  </div>
+
+  <div class="glass streak-card">
+    <div class="streak-orbit"><span>🔥</span></div>
+    <span class="eyebrow">Consistency</span><h2>{{ streak }} day streak</h2>
+    <p>Log a reading session each day to keep your streak alive.</p>
+    <div class="streak-metrics"><div><b>{{ total_minutes }}</b><span>minutes read</span></div><div><b>{{ reading_sessions }}</b><span>sessions</span></div></div>
+    <a class="btn btn-primary" href="{{ url_for('library') }}">Find something to read →</a>
+  </div>
+</section>
+
+<section class="section reveal">
+  <div class="section-head"><div><span class="eyebrow">Activity</span><h2>Recent searches</h2></div></div>
+  <div class="glass" style="padding:8px">{% for x in recent %}<div class="bench-table"><div><b>{{ x.query }}</b><span>{{ x.algorithm }}</span><span>{{ '%.2f'|format(x.duration_ms) }} ms</span><span>{{ x.result_count }} results</span></div></div>{% else %}<div class="empty">No searches yet.</div>{% endfor %}</div>
+</section>
+{% endblock %}
